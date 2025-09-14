@@ -90,4 +90,11 @@ class User extends Authenticatable implements MustVerifyEmail
         // kiểm tra xem trong tập hợp (collection) này có chứa $user được truyền vào không.
         return $this->followers()->where('follower_id', $user->id)->exists();
     }
+
+    // kiểm tra xem người dùng đã clap bài viết này chưa
+    // nếu có thì trả về true, nếu không thì trả về false
+    public function hasClapped(Post $post)
+    {
+        return $post->claps()->where('user_id', $this->id)->exists();
+    }
 }

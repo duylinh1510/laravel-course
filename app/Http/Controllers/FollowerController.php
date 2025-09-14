@@ -16,6 +16,8 @@ class FollowerController extends Controller
     // toggle(Auth::user()) → Eloquent sẽ kiểm tra:
     // Nếu bản ghi (user_id = $user->id, follower_id = Auth::id()) chưa tồn tại → nó sẽ thêm mới (follow).
     // Nếu đã tồn tại → nó sẽ xóa đi (unfollow).
+    // Nếu bản ghi quan hệ chưa tồn tại → toggle() sẽ thêm (insert vào bảng pivot).
+    // Nếu bản ghi quan hệ đã tồn tại → toggle() sẽ xóa (delete khỏi bảng pivot).
     public function followUnfollow(User $user)
     {
         $user->followers()->toggle(Auth::user());

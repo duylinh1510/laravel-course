@@ -38,7 +38,7 @@
                     </div>
                     <div class="flex items-center space-x-6">
                         <!-- Clap Button -->
-                        <x-clap-button/>
+                        <x-clap-button :post="$post"/>
                         <!-- Comment Button -->
                         <x-comment-button/>
                     </div>
@@ -72,7 +72,7 @@
                         <!-- Left side: Clap & Comment -->
                         <div class="flex items-center space-x-6">
                             <!-- Clap Button -->
-                            <x-clap-button/>
+                            <x-clap-button :post="$post"/>
                             <!-- Comment Button -->
                             <x-comment-button/>
                         </div>

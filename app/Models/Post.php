@@ -32,6 +32,11 @@ class Post extends Model
         return $this->belongsTo(Category::class);
     }
 
+    public function claps()
+    {
+        return $this->hasMany(Clap::class);
+    }
+
     public function readTime($wordsPerMinute=200)
     {
         // 1. Đếm số từ trong content (sau khi bỏ hết thẻ HTML)
