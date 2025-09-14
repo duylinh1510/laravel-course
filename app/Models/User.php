@@ -3,11 +3,15 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
@@ -19,8 +23,11 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'username',
         'email',
         'password',
+        'image',
+        'bio',
     ];
 
     /**
@@ -44,5 +51,43 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function posts()
+    {
+        return $this->hasMany(Post::class);
+    }
+
+    //quan hệ Many-to-Many giữa nhiều User
+    //Tức là một user có thể theo dõi nhiều user khác, và một user có thể được nhiều user theo dõi.
+    //followers là bảng trung gian (pivot)
+    //user_id là foreign key trong bảng pivot trỏ đến user được theo dõi.
+    //follower_id là foreign key trong bảng pivot trỏ đến user đi theo dõi (follower).
+    public function following() //->Lấy danh sách người mình theo dõi
+    {
+        return $this->belongsToMany(User::class, 'followers', 'follower_id', 'user_id');
+    }
+
+
+    //lấy danh sách người đang theo dõi mình.
+    //user_id là chính mình
+    //follower_id là những người theo dõi mình
+    public function followers()
+    {
+        return $this->belongsToMany(User::class, 'followers', 'user_id', 'follower_id');
+    }
+
+    public function imageUrl(){
+        if($this->image){
+            return Storage::url($this->image);
+        }
+        return null;
+    }
+
+    public function isFollowedBy(User $user)
+    {
+        // gọi tới quan hệ followers(), danh sách những người đang theo dõi $this user.
+        // kiểm tra xem trong tập hợp (collection) này có chứa $user được truyền vào không.
+        return $this->followers()->where('follower_id', $user->id)->exists();
     }
 }

@@ -13,10 +13,26 @@
         @csrf
     </form>
 
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6">
+    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6" enctype="multipart/form-data">
         @csrf
         @method('patch')
-
+        
+        @if($user->image)
+        <div>
+            <img src="{{ $user->imageUrl() }}" alt="{{ $user->name }}" class="rounded-full w-20 h-20 object-cover">
+        </div>
+        @endif
+        <!-- Image -->
+        <div>
+            <x-input-label for="image" :value="__('Avatar')" />
+            <x-text-input id="image" class="block mt-1 w-full" type="file" name="image" :value="old('image', $user->image)" autofocus/>
+            <x-input-error :messages="$errors->get('image')" class="mt-2" />
+        </div>
+        <div>
+            <x-input-label for="username" :value="__('Username')" />
+            <x-text-input id="username" name="username" type="text" class="mt-1 block w-full" :value="old('username', $user->username)" required autofocus autocomplete="username" />
+            <x-input-error class="mt-2" :messages="$errors->get('username')" />
+        </div>
         <div>
             <x-input-label for="name" :value="__('Name')" />
             <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name', $user->name)" required autofocus autocomplete="name" />
@@ -46,7 +62,12 @@
                 </div>
             @endif
         </div>
-
+        <!-- Bio Profile -->
+        <div class="mt-4">
+            <x-input-label for="bio" :value="__('Bio')"/>
+            <x-input-textarea id="bio" class="block mt-1" name="bio">{{ old('bio', $user->bio)}}</x-input-textarea>
+            <x-input-error :messages="$errors->get('bio')" class="mt-2"/>
+        </div>
         <div class="flex items-center gap-4">
             <x-primary-button>{{ __('Save') }}</x-primary-button>
 
@@ -60,5 +81,6 @@
                 >{{ __('Saved.') }}</p>
             @endif
         </div>
+
     </form>
 </section>

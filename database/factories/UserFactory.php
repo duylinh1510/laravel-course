@@ -23,8 +23,10 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
+        $name=fake()->name();  // Tạo tên ngẫu nhiên, ví dụ: "Nguyen Van A"
         return [
-            'name' => fake()->name(),
+            'name' => $name,  //Tạo tên từ $name
+            'username' => Str::slug($name), //tạo username từ $name
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
