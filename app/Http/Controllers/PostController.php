@@ -59,14 +59,10 @@ class PostController extends Controller
     public function store(PostCreateRequest $request)
     {
         $data = $request->validated();
-
-        // $image = $data['image'];
-        // unset($data['image']);
         $data['user_id'] = Auth::id();
-        $data['slug'] = Str::slug($data['title']); 
-
-        // $imagePath = $image->store('posts', 'public');
-        // $data['image'] = $imagePath;
+        
+        // Bỏ dòng này vì slug sẽ tự động tạo
+        // $data['slug'] = Str::slug($data['title']); 
 
         $post = Post::create($data);
 
@@ -158,7 +154,22 @@ class PostController extends Controller
      */
     public function destroy(Post $post)
     {
-        //
+        // Kiểm tra quyền: chỉ author mới được xóa
+        if($post->user_id !== Auth::id())
+        {
+            abort(403, 'Unauthorized Action.');
+        } 
+
+        // Xóa claps liên quan
+        $post->claps()->delete();
+
+        // Xóa tất cả media liên quan
+        $post->clearMediaCollection();
+
+        // Xóa post
+        $post->delete();
+
+        return redirect()->route('my.posts')->with('success', 'Post deleted successfully!');
     }
 
     public function category(Category $category)

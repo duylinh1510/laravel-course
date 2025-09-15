@@ -7,6 +7,7 @@ use App\Models\Follower;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FollowerController;
 use App\Http\Controllers\ClapController;
+use App\Http\Controllers\CommentController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -49,6 +50,10 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/post/{post}/edit', [PostController::class, 'edit'])->name('post.edit');
     Route::put('/post/{post}', [PostController::class, 'update'])->name('post.update');
+    Route::delete('/post/{post}', [PostController::class, 'destroy'])->name('post.destroy');
+
+    Route::post('/post/{post}/comment', [CommentController::class, 'store'])->name('comment.store');
+    Route::delete('/comment/{comment}', [CommentController::class, 'destroy'])->name('comment.destroy');
 });
 
 require __DIR__.'/auth.php';

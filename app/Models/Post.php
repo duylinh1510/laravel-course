@@ -8,12 +8,14 @@ use Illuminate\Support\Facades\Storage;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
-
+use Spatie\Sluggable\HasSlug;
+use Spatie\Sluggable\SlugOptions;
 
 class Post extends Model implements HasMedia
 {
     use HasFactory;
     use InteractsWithMedia;
+    use HasSlug;
 
     // $fillable là một mảng danh sách các cột (fields) trong bảng database được cho phép gán hàng loạt (Mass Assignment).
     // Giúp bạn có thể dùng $model->create([...]) hoặc $model->update([...]) mà không sợ bị lỗi bảo mật.
@@ -26,6 +28,14 @@ class Post extends Model implements HasMedia
         'user_id',
         'published_at',
     ];
+
+    public function getSlugOptions(): SlugOptions
+    {
+        return SlugOptions::create()
+            ->generateSlugsFrom('title')
+            ->saveSlugsTo('slug')
+            ->doNotGenerateSlugsOnUpdate(); // Không tự động update slug khi edit
+    }
 
     //Đây là hook method được Spatie gọi mỗi khi bạn thêm media vào model.
     //Bạn định nghĩa ở trong model (ví dụ Post, User) để khai báo các conversions (phiên bản đã xử lý) của file.
@@ -60,6 +70,16 @@ class Post extends Model implements HasMedia
     public function claps()
     {
         return $this->hasMany(Clap::class);
+    }
+
+    public function comments()
+    {
+        return $this->hasMany(Comment::class)->parent()->with('user', 'replies');
+    }
+
+    public function allComments()
+    {
+        return $this->hasMany(Comment::class);
     }
 
     public function readTime($wordsPerMinute=200)
