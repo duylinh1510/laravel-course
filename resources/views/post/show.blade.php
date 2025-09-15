@@ -44,9 +44,9 @@
                     </div>
                 </header>
                 <!-- Featured Image (nếu có) -->
-                @if ($post->image)
+                @if ($post->getFirstMedia())
                 <div class="mb-8">
-                    <img src="{{ Storage::url($post->image) }}" alt="{{ $post->title }}" class="w-full h-auto rounded-lg shadow-sm">
+                    <img src="{{ $post->imageUrl() }}" alt="{{ $post->title }}" class="w-full h-auto rounded-lg shadow-sm">
                 </div>
                 @endif
 

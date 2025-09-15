@@ -32,24 +32,31 @@ class ProfileController extends Controller
         // fill(...) → gán các field hợp lệ vào model User (nhưng chưa lưu ngay).
         
         $data=$request->validated();
-        $image=$data['image'] ?? null;
+        // $image=$data['image'] ?? null;
 
-        if($image){
-            // lưu file image vào thư mục storage/app/public/avatars
-            $data['image'] = $image->store('avatars', 'public');
-        }
+        // if($image){
+        //     // lưu file image vào thư mục storage/app/public/avatars
+        //     $data['image'] = $image->store('avatars', 'public');
+        // }
         
+        $user = $request->user();
+        $user->fill($data);
         // gán dữ liệu đã xử lý vào user
         Auth::user()->fill($data);
 
         // 2. Kiểm tra xem email có thay đổi không
         // Nếu email đổi → set lại email_verified_at = null để buộc user phải xác minh lại email mới.
-        if (Auth::user()->isDirty('email')) {
-            Auth::user()->email_verified_at = null;
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
         }
 
         // 3. Lưu thông tin vào database
-        Auth::user()->save();
+        $user->save();
+        if ($request->hasFile('image')) {
+            $user->addMediaFromRequest('image')
+                ->toMediaCollection('avatar');
+        }
+
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 

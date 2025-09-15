@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use phpDocumentor\Reflection\Types\Nullable;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class PostController extends Controller
 {
@@ -51,23 +52,21 @@ class PostController extends Controller
      */
     public function store(PostCreateRequest $request)
     {
-        //Tạo PostCreateRequest để Controller trong gọn hơn
-
         $data = $request->validated();
-        
-        $image = $data['image'];
+
+        // $image = $data['image'];
         // unset($data['image']);
         $data['user_id'] = Auth::id();
-        $data['slug'] = Str::slug($data['title']);
 
-        $imagePath = $image->store('posts', 'public');
-        $data['image'] = $imagePath;
+        // $imagePath = $image->store('posts', 'public');
+        // $data['image'] = $imagePath;
 
-        Post::create($data);
-      
+        $post = Post::create($data);
+
+        $post->addMediaFromRequest('image')
+            ->toMediaCollection();
+
         return redirect()->route('dashboard');
-
-
     }
 
     /**
