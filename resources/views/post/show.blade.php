@@ -36,6 +36,16 @@
                             @endif
                         @endauth
                     </div>
+                    @auth
+                        @if (auth()->id() === $post->user->id)
+                        <div class="mb-4">
+                            <a href="{{ route('post.edit', $post) }}"
+                            class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">
+                            Edit Post
+                            </a>
+                        </div>
+                        @endif
+                    @endauth
                     <div class="flex items-center space-x-6">
                         <!-- Clap Button -->
                         <x-clap-button :post="$post"/>

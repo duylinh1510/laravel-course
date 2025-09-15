@@ -5,11 +5,15 @@ namespace App\Http\Controllers;
 use App\Http\Requests\PostCreateRequest;
 use App\Models\Category;
 use App\Models\Post;
+use Illuminate\Console\View\Components\Warn;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use phpDocumentor\Reflection\Types\Nullable;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+
+
 
 class PostController extends Controller
 {
@@ -20,7 +24,9 @@ class PostController extends Controller
     {   
         //query tất cả bài viết, lấy mới nhất trước
         //nếu chưa đăng nhập thì hiển thị tất cả bài viết mới nhất
-        $query = Post::latest(); 
+        $query = Post::with(['user' , 'media'])
+            ->withCount('claps')
+            ->latest();
 
         $user = Auth::user(); //Lấy ra user hiện đang đăng nhập
         if($user)//nếu user có đăng nhập
@@ -57,6 +63,7 @@ class PostController extends Controller
         // $image = $data['image'];
         // unset($data['image']);
         $data['user_id'] = Auth::id();
+        $data['slug'] = Str::slug($data['title']); 
 
         // $imagePath = $image->store('posts', 'public');
         // $data['image'] = $imagePath;
@@ -84,7 +91,14 @@ class PostController extends Controller
      */
     public function edit(Post $post)
     {
-        //
+        // Kiểm tra quyền: chỉ author mới được edit
+        if($post->user_id !== Auth::id())
+        {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $categories = Category::get();
+        return view('post.edit', compact('post', 'categories'));
     }
 
     /**
@@ -92,7 +106,51 @@ class PostController extends Controller
      */
     public function update(Request $request, Post $post)
     {
-        //
+        //Kiểm tra quyền: chỉ author mới được edit
+        if($post->user_id !== Auth::id())
+        {
+            abort(403, 'Unauthorized action.');
+        }
+        
+        $data = $request->validate([
+            'title' =>'required|string|max:255',
+            'content' => 'required|string',
+            'category_id' => 'required|exists:categories,id',
+            'published_at' => 'nullable|datetime',
+            'image' => 'nullable|image|mimes:webp,jpeg,png,jpg,gif,svg|max:2048',
+        ]);
+
+        // tạo slug mới nếu title thay đổi
+        if($data['title'] !== $post->title) {
+            $baseSlug= Str::slug($data['title']);
+            $slug= $baseSlug;
+            $counter = 1;
+            
+            while(Post::where('slug', $slug)->where('id', '!=', $post->id)->exists())
+            {
+                $slug = $baseSlug . '-' . $counter;
+                $counter++;
+            }
+            
+            $data['slug'] = $slug;
+        }
+
+        $post->update($data);
+
+        //xử lí ảnh mới nếu có
+        if($request->hasFile('image'))
+        {
+            //xóa ảnh cũ
+            $post->clearMediaCollection();
+
+            //thêm ảnh mới
+            $post->addMediaFromRequest('image')
+                 ->toMediaCollection();
+        }
+
+        return redirect()->route('post.show', ['username' => $post->user->username, 'post' => $post->slug])
+                     ->with('success', 'Post updated successfully!');
+        
     }
 
     /**
@@ -105,11 +163,25 @@ class PostController extends Controller
 
     public function category(Category $category)
     {
-        $posts = $category->posts()->latest()->simplePaginate(5);
+        $posts = $category->posts()
+            ->with(['user', 'media'])
+            ->withCount('claps')
+            ->latest()
+            ->simplePaginate(5);
 
         return view('post.index', [
             'posts' => $posts,
         ]);
+    }
+
+    function myPosts()
+    {
+        $posts=Auth::user()->posts()
+            ->with(['user', 'media'])
+            ->withCount('claps')
+            ->latest()
+            ->paginate(10);
+        return view('post.my-posts', compact('posts'));
     }
 }
 

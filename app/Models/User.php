@@ -96,12 +96,15 @@ class User extends Authenticatable implements MustVerifyEmail, HasMedia
     }
 
     public function imageUrl()
-    {
+    {   
+        // Lấy ra media đầu tiên trong collection có tên avatar.
+        // Ví dụ model User có 1 collection ảnh đại diện (avatar) và 1 collection khác (cover), thì đoạn này chỉ lấy ảnh thuộc avatar.
         $media = $this->getFirstMedia('avatar');
-        if (!$media) {
-            return null;
+        if (!$media) { // Nếu user chưa có media trong collection avatar → trả về null.
+            return null; // Nghĩa là chưa có ảnh đại diện.
         }
-        if ($media->hasGeneratedConversion('avatar')) {
+        if ($media->hasGeneratedConversion('avatar')) // Kiểm tra xem media đó có conversion tên là "avatar" hay không.
+        {                                             // Conversion là phiên bản ảnh đã được xử lý (resize, crop, thumbnail...) trong registerMediaConversions().
             return $media->getUrl('avatar');
         }
         return $media->getUrl();
