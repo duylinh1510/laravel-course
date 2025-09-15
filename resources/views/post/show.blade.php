@@ -14,8 +14,8 @@
                         <x-user-avatar :user="$post->user"/>
                         <!-- Author Details -->
                         <div>
-                            <a href="{{ route('profile.show', $post->user)}}" class=" hover:underline text-sm font-semibold text-gray-900">{{ $post->user->name }}</a>
-                            <div class="flex items-center text-sm text-gray-500 space-x-2">
+                            <a href="{{ route('profile.show', $post->user)}}" class=" hover:underline text-lg font-semibold text-gray-900">{{ $post->user->name }}</a>
+                            <div class="flex items-center text-lg text-gray-500 space-x-2">
                                 <span>{{ $post->created_at->format('M d, Y') }}</span>
                                 <span>·</span>
                                 <span>{{ $post->readTime() }} min read</span>

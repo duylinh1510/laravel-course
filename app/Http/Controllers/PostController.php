@@ -16,11 +16,22 @@ class PostController extends Controller
      * Display a listing of the resource.
      */
     public function index()
-    {
-        $posts = Post::latest()->paginate(10);
-        
+    {   
+        //query tất cả bài viết, lấy mới nhất trước
+        //nếu chưa đăng nhập thì hiển thị tất cả bài viết mới nhất
+        $query = Post::latest(); 
+
+        $user = Auth::user(); //Lấy ra user hiện đang đăng nhập
+        if($user)//nếu user có đăng nhập
+        {
+            $ids = $user->following()->pluck('users.id'); //lấy ra những user_id mà user đăng nhập hiện tại đang follow
+            $query->whereIn('user_id', $ids); //thêm điều kiện chỉ lấy ra những bài viết được viết bởi user_id đó
+        }
+
+
+        $posts = $query->paginate(10);
         return view('post.index', [ 
-            'posts'=>$posts
+            'posts'=>$posts //truyền biến $posts sang view với key là posts
         ]);
     }
 

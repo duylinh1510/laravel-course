@@ -84,8 +84,12 @@ class User extends Authenticatable implements MustVerifyEmail
         return null;
     }
 
-    public function isFollowedBy(User $user)
+    public function isFollowedBy(?User $user)
     {
+        if(!$user)
+        {
+            return false;
+        }
         // gọi tới quan hệ followers(), danh sách những người đang theo dõi $this user.
         // kiểm tra xem trong tập hợp (collection) này có chứa $user được truyền vào không.
         return $this->followers()->where('follower_id', $user->id)->exists();
