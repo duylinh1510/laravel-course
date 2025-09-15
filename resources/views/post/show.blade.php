@@ -36,9 +36,11 @@
                             @endif
                         @endauth
                     </div>
-                    <!-- Edit Post -->
-                    <x-post-actions :post="$post" />
-                    <div class="flex items-center space-x-6">
+                    <!-- Edit, Delete Post -->
+                    <div class="mt-8">
+                        <x-post-actions :post="$post" />
+                    </div>
+                    <div class="flex items-center space-x-6 border-b border-t border-gray-200">
                         <!-- Clap Button -->
                         <x-clap-button :post="$post"/>
                         <!-- Comment Button -->

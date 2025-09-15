@@ -29,6 +29,11 @@ class Post extends Model implements HasMedia
         'published_at',
     ];
 
+    // Thêm thuộc tính này
+    protected $casts = [
+        'published_at' => 'datetime',
+    ];
+
     public function getSlugOptions(): SlugOptions
     {
         return SlugOptions::create()
@@ -111,5 +116,26 @@ class Post extends Model implements HasMedia
             return $media->getUrl($conversionName); //Nếu có conversion → trả về URL của file conversion đó.
         }
         return $media->getUrl(); // Nếu không có conversion → fallback về URL file gốc.
+    }
+
+    public function scopePublished($query)
+    {
+        return $query->where('published_at', '<=', now());
+    }
+
+    public function scopeScheduled($query)
+    {
+        return $query->where('published_at', '>', now());
+    }
+
+    // Helper method để kiểm tra post đã publish chưa
+    public function isPublished()
+    {
+        return $this->published_at <= now();
+    }
+
+    public function isScheduled()
+    {
+        return $this->published_at > now();
     }
 }

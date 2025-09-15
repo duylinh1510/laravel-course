@@ -9,7 +9,10 @@ class PublicProfileController extends Controller
 {
     public function show(User $user)
     {   
-        $posts =$user->posts()->latest()->paginate();
+        $posts = $user->posts()
+            ->published() // Chỉ hiển thị posts đã publish
+            ->latest('published_at')
+            ->paginate();
 
         // check xem hiện tại user đang có bao nhiêu followers
         // dd($user->followers);

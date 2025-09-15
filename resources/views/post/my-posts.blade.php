@@ -16,6 +16,16 @@
             <div class="mt-8 text-gray-300">
                 @forelse ($posts as $post)
                     <div class="bg-white border border-gray-200 rounded-lg shadow-sm mb-8 p-5">
+                        @if($post->isScheduled())
+                            <div class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium mb-3 inline-block">
+                                Scheduled for {{ $post->published_at->format('M d, Y H:i') }}
+                            </div>
+                        @elseif($post->isPublished())
+                            <div class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium mb-3 inline-block">
+                                Published
+                            </div>
+                        @endif
+                        
                         <x-post-actions :post="$post" />
                         <x-post-item :post="$post" />
                     </div>

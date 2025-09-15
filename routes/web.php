@@ -7,7 +7,7 @@ use App\Models\Follower;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FollowerController;
 use App\Http\Controllers\ClapController;
-use App\Http\Controllers\CommentController;
+use App\Http\Controllers\CommentController; 
 
 Route::get('/', function () {
     return view('welcome');
@@ -23,10 +23,10 @@ Route::get('/@{username}/{post:slug}', [PostController::class, 'show'])
 Route::get('/', [PostController::class, 'index'])
     ->name('dashboard');
 
-Route::middleware(['auth','verified'])->group(function(){
-
-    Route::get('/category/{category}', [PostController::class, 'category'])
+Route::get('/category/{category}', [PostController::class, 'category'])
     ->name('post.byCategory');
+
+Route::middleware(['auth','verified'])->group(function(){
 
     Route::get('/post/create', [PostController::class, 'create'])
     ->name('post.create');

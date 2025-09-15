@@ -12,6 +12,7 @@ use phpDocumentor\Reflection\Types\Nullable;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use App\Http\Requests\PostUpdateRequest;
 
 
 
@@ -24,9 +25,10 @@ class PostController extends Controller
     {   
         //query tất cả bài viết, lấy mới nhất trước
         //nếu chưa đăng nhập thì hiển thị tất cả bài viết mới nhất
-        $query = Post::with(['user' , 'media'])
+        $query = Post::published() // Chỉ lấy posts đã publish
+            ->with(['user', 'media'])
             ->withCount('claps')
-            ->latest();
+            ->latest('published_at'); // Sort theo published_at thay vì created_at
 
         $user = Auth::user(); //Lấy ra user hiện đang đăng nhập
         if($user)//nếu user có đăng nhập
@@ -61,15 +63,19 @@ class PostController extends Controller
         $data = $request->validated();
         $data['user_id'] = Auth::id();
         
-        // Bỏ dòng này vì slug sẽ tự động tạo
-        // $data['slug'] = Str::slug($data['title']); 
+        // Nếu không có published_at, set là thời điểm hiện tại
+        if (!$data['published_at']) {
+            $data['published_at'] = now();
+        }
 
         $post = Post::create($data);
 
-        $post->addMediaFromRequest('image')
-            ->toMediaCollection();
+        if ($request->hasFile('image')) {
+            $post->addMediaFromRequest('image')
+                ->toMediaCollection();
+        }
 
-        return redirect()->route('dashboard');
+        return redirect()->route('dashboard')->with('success', 'Post created successfully!');
     }
 
     /**
@@ -100,7 +106,7 @@ class PostController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Post $post)
+    public function update(PostUpdateRequest $request, Post $post)
     {
         //Kiểm tra quyền: chỉ author mới được edit
         if($post->user_id !== Auth::id())
@@ -175,9 +181,10 @@ class PostController extends Controller
     public function category(Category $category)
     {
         $posts = $category->posts()
+            ->published() // Chỉ lấy posts đã publish
             ->with(['user', 'media'])
             ->withCount('claps')
-            ->latest()
+            ->latest('published_at')
             ->simplePaginate(5);
 
         return view('post.index', [
@@ -187,10 +194,10 @@ class PostController extends Controller
 
     function myPosts()
     {
-        $posts=Auth::user()->posts()
+        $posts = Auth::user()->posts()
             ->with(['user', 'media'])
             ->withCount('claps')
-            ->latest()
+            ->latest('created_at') // Sort theo created_at để thấy tất cả posts
             ->paginate(10);
         return view('post.my-posts', compact('posts'));
     }
